@@ -2,17 +2,19 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll().then((data) => {
-    res.render("shop/index", {
-      pageTitle: "Shop",
-      prods: data,
-      path: "/",
-    });
-  });
+  Product.fetchAll()
+    .then(([data, fieldData]) => {
+      res.render("shop/index", {
+        pageTitle: "Shop",
+        prods: data,
+        path: "/",
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then((data) => {
+  Product.fetchAll().then(([data]) => {
     res.render("shop/product-list", {
       pageTitle: "All Products",
       prods: data,
@@ -23,10 +25,10 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProductDetails = (req, res, next) => {
   const id = req.params.productId;
-  Product.findById(id).then((data) => {
+  Product.findById(id).then(([data]) => {
     res.render("shop/product-detail", {
       pageTitle: "Product Details",
-      product: data,
+      product: data[0],
       path: `/products`,
     });
   });
@@ -34,7 +36,7 @@ exports.getProductDetails = (req, res, next) => {
 
 exports.getCart = async (req, res, next) => {
   const cart = await Cart.getCart();
-  const allProducts = await Product.fetchAll();
+  const [allProducts] = await Product.fetchAll();
   const usedProducts = allProducts.reduce((acc, product) => {
     const usedProduct = cart.products.find(
       (cartProduct) => cartProduct.id === product.id
@@ -51,8 +53,8 @@ exports.getCart = async (req, res, next) => {
 
 exports.postCart = async (req, res, next) => {
   const prodId = req.body.productId;
-  const product = await Product.findById(prodId);
-  await Cart.addProduct(prodId, product.price);
+  const [product] = await Product.findById(prodId);
+  await Cart.addProduct(prodId, product[0].price);
   res.redirect("/");
 };
 

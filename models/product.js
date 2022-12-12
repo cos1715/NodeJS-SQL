@@ -1,8 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const Cart = require("./cart");
-const rootDir = require("../util/path");
-const filePath = path.join(rootDir, "data", "products.json");
+const db = require("../util/db");
 
 module.exports = class Product {
   constructor({ id, title, imageUrl, description, price }) {
@@ -14,56 +11,39 @@ module.exports = class Product {
   }
 
   static fetchAll() {
-    let products = [];
-    const fileBody = [];
-    return new Promise((resolve, reject) => {
-      fs.readFile(filePath, (err, fileContent) => {
-        if (!err) {
-          fileBody.push(fileContent);
-          const bufferData = Buffer.concat(fileBody).toString();
-          products = JSON.parse(bufferData);
-        }
-        resolve(products);
-      });
-    });
+    return db.execute("SELECT * FROM products");
   }
 
   static async findById(id) {
-    const products = await Product.fetchAll();
-    const product = products.find((prod) => prod.id === id);
-
-    return product;
+    return db.execute(`SELECT * FROM products WHERE products.id = ?`, [id]);
   }
 
   static async deleteById(id) {
     if (id) {
-      const products = await Product.fetchAll();
-      const newProducts = products.filter((data) => data.id !== id);
-      fs.writeFile(filePath, JSON.stringify(newProducts), (err) => {
-        if (err) {
-          console.log("delete err==>", err);
-        } else {
-          Cart.deleteProduct(id);
-        }
-      });
+      db.execute(`DELETE FROM products WHERE products.id = ?`, [id])
+        .then((data) => {
+          console.log("delete", data);
+        })
+        .catch((err) => {
+          console.log("delete err", err);
+        });
+      // delete from cart
     } else {
       throw "No id provided";
     }
   }
 
   async save() {
-    const products = await Product.fetchAll();
     if (this.id) {
-      const productIndex = products.findIndex((data) => data.id === this.id);
-      products[productIndex] = this;
+      db.execute(
+        `UPDATE products SET title = ?, price = ?, description = ?, imageUrl = ? WHERE products.id = ?`,
+        [this.title, this.price, this.description, this.imageUrl, id]
+      );
     } else {
-      this.id = Math.floor(Math.random() * 100 + 1).toString();
-      products.push(this);
+      db.execute(
+        `INSERT INTO products (title, price, description, imageUrl) VALUES (?, ?, ?, ?)`,
+        [this.title, this.price, this.description, this.imageUrl]
+      );
     }
-    fs.writeFile(filePath, JSON.stringify(products), (err) => {
-      if (err) {
-        console.log("save err==>", err);
-      }
-    });
   }
 };

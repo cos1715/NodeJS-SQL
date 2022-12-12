@@ -18,13 +18,16 @@ exports.postAddProduct = (req, res, next) => {
     price: req.body.price,
   });
 
-  product.save().then(() => {
-    res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
-  });
+  product
+    .save()
+    .then(() => {
+      res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
+    })
+    .catch((err) => console.log("postEditProduct err", err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then((data) => {
+  Product.fetchAll().then(([data]) => {
     res.render(VIEW_ROUTES.adminProducts, {
       prods: data,
       pageTitle: "Admin Products",
@@ -39,13 +42,14 @@ exports.getEditProduct = async (req, res, next) => {
     res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
   } else {
     const productId = req.params.productId;
-    const product = await Product.findById(productId);
-    if (product) {
+    const [product] = await Product.findById(productId);
+    const exactProduct = product[0];
+    if (exactProduct) {
       res.render(VIEW_ROUTES.adminEditProduct, {
         pageTitle: "Edit Product",
         path: `/admin${ADMIN_URL_ROUTES.editProductId}`,
         edit,
-        product,
+        product: exactProduct,
       });
     } else {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
