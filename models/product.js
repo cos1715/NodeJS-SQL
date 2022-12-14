@@ -1,49 +1,78 @@
-const Cart = require("./cart");
-const db = require("../util/db");
+const Sequelize = require("sequelize");
+const sequelize = require("../util/db");
 
-module.exports = class Product {
-  constructor({ id, title, imageUrl, description, price }) {
-    this.id = id;
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
-    this.price = price;
-  }
+const Product = sequelize.define("product", {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  title: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
+  imageUrl: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+});
 
-  static fetchAll() {
-    return db.execute("SELECT * FROM products");
-  }
+module.exports = Product;
 
-  static async findById(id) {
-    return db.execute(`SELECT * FROM products WHERE products.id = ?`, [id]);
-  }
+// const Cart = require("./cart");
 
-  static async deleteById(id) {
-    if (id) {
-      db.execute(`DELETE FROM products WHERE products.id = ?`, [id])
-        .then((data) => {
-          console.log("delete", data);
-        })
-        .catch((err) => {
-          console.log("delete err", err);
-        });
-      // delete from cart
-    } else {
-      throw "No id provided";
-    }
-  }
+// module.exports = class Product {
+//   constructor({ id, title, imageUrl, description, price }) {
+//     this.id = id;
+//     this.title = title;
+//     this.imageUrl = imageUrl;
+//     this.description = description;
+//     this.price = price;
+//   }
 
-  async save() {
-    if (this.id) {
-      db.execute(
-        `UPDATE products SET title = ?, price = ?, description = ?, imageUrl = ? WHERE products.id = ?`,
-        [this.title, this.price, this.description, this.imageUrl, id]
-      );
-    } else {
-      db.execute(
-        `INSERT INTO products (title, price, description, imageUrl) VALUES (?, ?, ?, ?)`,
-        [this.title, this.price, this.description, this.imageUrl]
-      );
-    }
-  }
-};
+//   static fetchAll() {
+//     return db.execute("SELECT * FROM products");
+//   }
+
+//   static async findById(id) {
+//     return db.execute(`SELECT * FROM products WHERE products.id = ?`, [id]);
+//   }
+
+//   static async deleteById(id) {
+//     if (id) {
+//       db.execute(`DELETE FROM products WHERE products.id = ?`, [id])
+//         .then((data) => {
+//           console.log("delete", data);
+//         })
+//         .catch((err) => {
+//           console.log("delete err", err);
+//         });
+//       // delete from cart
+//     } else {
+//       throw "No id provided";
+//     }
+//   }
+
+//   async save() {
+//     if (this.id) {
+//       db.execute(
+//         `UPDATE products SET title = ?, price = ?, description = ?, imageUrl = ? WHERE products.id = ?`,
+//         [this.title, this.price, this.description, this.imageUrl, id]
+//       );
+//     } else {
+//       db.execute(
+//         `INSERT INTO products (title, price, description, imageUrl) VALUES (?, ?, ?, ?)`,
+//         [this.title, this.price, this.description, this.imageUrl]
+//       );
+//     }
+//   }
+// };

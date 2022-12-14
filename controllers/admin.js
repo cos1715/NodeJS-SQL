@@ -11,23 +11,20 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const product = new Product({
+  Product.create({
     title: req.body.title,
     imageUrl: req.body.imageUrl,
     description: req.body.description,
     price: req.body.price,
-  });
-
-  product
-    .save()
+  })
     .then(() => {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
     })
-    .catch((err) => console.log("postEditProduct err", err));
+    .catch((err) => console.log("postAddProduct err", err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then(([data]) => {
+  Product.findAll().then((data) => {
     res.render(VIEW_ROUTES.adminProducts, {
       prods: data,
       pageTitle: "Admin Products",
@@ -42,14 +39,13 @@ exports.getEditProduct = async (req, res, next) => {
     res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
   } else {
     const productId = req.params.productId;
-    const [product] = await Product.findById(productId);
-    const exactProduct = product[0];
-    if (exactProduct) {
+    const product = await Product.findByPk(productId);
+    if (product) {
       res.render(VIEW_ROUTES.adminEditProduct, {
         pageTitle: "Edit Product",
         path: `/admin${ADMIN_URL_ROUTES.editProductId}`,
         edit,
-        product: exactProduct,
+        product,
       });
     } else {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
@@ -57,20 +53,25 @@ exports.getEditProduct = async (req, res, next) => {
   }
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const body = req.body;
-  const product = new Product(body);
-  product
-    .save()
-    .then(() => {
-      res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
-    })
-    .catch((err) => console.log("postEditProduct err", err));
+  try {
+    const product = await Product.findByPk(body.id);
+    product.title = body.title;
+    product.price = body.price;
+    product.imageUrl = body.imageUrl;
+    product.description = body.description;
+    await product.save();
+    res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
+  } catch (err) {
+    console.log("postEditProduct err", err);
+  }
 };
 
 exports.postDeleteProduct = (req, res, next) => {
   const body = req.body;
-  Product.deleteById(body.id)
+  Product.findByPk(body.id)
+    .then((data) => data.destroy())
     .then(() => {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
     })

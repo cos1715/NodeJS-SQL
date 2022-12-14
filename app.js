@@ -8,6 +8,8 @@ const { getNotFound } = require("./controllers/error");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
+const sequelize = require("./util/db");
+
 const app = express();
 
 app.set("view engine", "ejs");
@@ -20,4 +22,9 @@ app.use(shopRoutes);
 
 app.use(getNotFound);
 
-app.listen(3003);
+sequelize
+  .sync()
+  .then((data) => {
+    app.listen(3003);
+  })
+  .catch((err) => console.log(err));
