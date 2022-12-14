@@ -1,13 +1,13 @@
-const express = require("express");
-const { ADMIN_URL_ROUTES } = require("../const");
-const {
+import express from "express";
+import { ADMIN_URL_ROUTES } from "../const";
+import {
   getAddProduct,
   postAddProduct,
   getProducts,
   getEditProduct,
   postEditProduct,
   postDeleteProduct,
-} = require("../controllers/admin");
+} from "../controllers/admin";
 
 const router = express.Router();
 
@@ -29,4 +29,4 @@ router.post(ADMIN_URL_ROUTES.editProduct, postEditProduct);
 // /admin/delete-product => DELETE
 router.post(ADMIN_URL_ROUTES.deleteProduct, postDeleteProduct);
 
-module.exports = router;
+export default router;

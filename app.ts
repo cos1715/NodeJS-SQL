@@ -1,14 +1,14 @@
-const path = require("path");
+import path from "path";
 
-const express = require("express");
-const bodyParser = require("body-parser");
+import express from "express";
+import bodyParser from "body-parser";
 
-const { getNotFound } = require("./controllers/error");
+import { getNotFound } from "./controllers/error";
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+import adminRoutes from "./routes/admin";
+import shopRoutes from "./routes/shop";
 
-const sequelize = require("./util/db");
+import sequelize from "./util/db";
 
 const app = express();
 

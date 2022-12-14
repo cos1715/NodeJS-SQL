@@ -1,7 +1,8 @@
-const Product = require("../models/product");
-const { ADMIN_URL_ROUTES, VIEW_ROUTES } = require("../const");
+import { RequestHandler } from "express";
+import Product, { IProduct } from "../models/product";
+import { ADMIN_URL_ROUTES, VIEW_ROUTES } from "../const";
 
-exports.getAddProduct = (req, res, next) => {
+export const getAddProduct: RequestHandler = (req, res, next) => {
   res.render(VIEW_ROUTES.adminEditProduct, {
     pageTitle: "Add Product",
     path: `/admin${ADMIN_URL_ROUTES.addProduct}`,
@@ -10,7 +11,7 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-exports.postAddProduct = (req, res, next) => {
+export const postAddProduct: RequestHandler = (req, res, next) => {
   Product.create({
     title: req.body.title,
     imageUrl: req.body.imageUrl,
@@ -23,7 +24,7 @@ exports.postAddProduct = (req, res, next) => {
     .catch((err) => console.log("postAddProduct err", err));
 };
 
-exports.getProducts = (req, res, next) => {
+export const getProducts: RequestHandler = (req, res, next) => {
   Product.findAll().then((data) => {
     res.render(VIEW_ROUTES.adminProducts, {
       prods: data,
@@ -33,7 +34,7 @@ exports.getProducts = (req, res, next) => {
   });
 };
 
-exports.getEditProduct = async (req, res, next) => {
+export const getEditProduct: RequestHandler = async (req, res, next) => {
   const edit = req.query.edit === "true";
   if (!edit) {
     res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
@@ -53,25 +54,31 @@ exports.getEditProduct = async (req, res, next) => {
   }
 };
 
-exports.postEditProduct = async (req, res, next) => {
+export const postEditProduct: RequestHandler<any, any, IProduct> = async (
+  req,
+  res,
+  next
+) => {
   const body = req.body;
   try {
     const product = await Product.findByPk(body.id);
-    product.title = body.title;
-    product.price = body.price;
-    product.imageUrl = body.imageUrl;
-    product.description = body.description;
-    await product.save();
-    res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
+    if (product) {
+      (product as any).title = body.title;
+      (product as any).price = body.price;
+      (product as any).imageUrl = body.imageUrl;
+      (product as any).description = body.description;
+      await product.save();
+      res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
+    }
   } catch (err) {
     console.log("postEditProduct err", err);
   }
 };
 
-exports.postDeleteProduct = (req, res, next) => {
+export const postDeleteProduct: RequestHandler = (req, res, next) => {
   const body = req.body;
   Product.findByPk(body.id)
-    .then((data) => data.destroy())
+    .then((data) => data && data.destroy())
     .then(() => {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
     })

@@ -1,11 +1,11 @@
-const fs = require("fs");
-const path = require("path");
-const rootDir = require("../util/path");
+import fs from "fs";
+import path from "path";
+import rootDir from "../util/path";
 const filePath = path.join(rootDir, "data", "cart.json");
 
-module.exports = class Cart {
+class Cart {
   static getCart() {
-    const fileBody = [];
+    const fileBody: any[] = [];
     let cart = { products: [], totalPrice: 0 };
     return new Promise((resolve) => {
       fs.readFile(filePath, (err, fileContent) => {
@@ -20,9 +20,9 @@ module.exports = class Cart {
     });
   }
 
-  static async addProduct(id, productPrice) {
-    const cart = await Cart.getCart();
-    const index = cart.products.findIndex((prod) => prod.id === id);
+  static async addProduct(id: any, productPrice: any) {
+    const cart: any = await Cart.getCart();
+    const index = cart.products.findIndex((prod: any) => prod.id === id);
     const newProduct = cart.products[index] || {};
 
     if (index >= 0) {
@@ -41,10 +41,10 @@ module.exports = class Cart {
     });
   }
 
-  static async deleteProduct(id) {
-    const cart = await Cart.getCart();
+  static async deleteProduct(id: any) {
+    const cart: any = await Cart.getCart();
     let price = cart.totalPrice;
-    const products = cart.products.filter((data) => {
+    const products = cart.products.filter((data: any) => {
       if (data.id === id) {
         const productPrice = data.price * data.qty;
         price -= productPrice;
@@ -57,4 +57,6 @@ module.exports = class Cart {
       console.log(err);
     });
   }
-};
+}
+
+export default Cart;

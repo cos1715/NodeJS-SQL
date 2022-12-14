@@ -1,5 +1,13 @@
-const Sequelize = require("sequelize");
-const sequelize = require("../util/db");
+import Sequelize from "sequelize";
+import sequelize from "../util/db";
+
+export interface IProduct {
+  id: number;
+  title: string;
+  price: number;
+  imageUrl: string;
+  description: string;
+}
 
 const Product = sequelize.define("product", {
   id: {
@@ -26,7 +34,7 @@ const Product = sequelize.define("product", {
   },
 });
 
-module.exports = Product;
+export default Product;
 
 // const Cart = require("./cart");
 

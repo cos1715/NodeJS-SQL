@@ -11,8 +11,4 @@ const VIEW_ROUTES = {
   adminEditProduct: "admin/edit-product",
 };
 
-module.exports = {
-  URL_ROUTES,
-  ADMIN_URL_ROUTES,
-  VIEW_ROUTES,
-};
+export { URL_ROUTES, ADMIN_URL_ROUTES, VIEW_ROUTES };
