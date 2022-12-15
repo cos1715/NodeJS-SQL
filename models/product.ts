@@ -1,4 +1,11 @@
-import Sequelize from "sequelize";
+import {
+  Sequelize,
+  Model,
+  DataTypes,
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+} from "sequelize";
 import sequelize from "../util/db";
 
 export interface IProduct {
@@ -9,27 +16,40 @@ export interface IProduct {
   description: string;
 }
 
-const Product = sequelize.define("product", {
+interface IProductModel
+  extends Model<
+    InferAttributes<IProductModel>,
+    InferCreationAttributes<IProductModel>
+  > {
+  // Some fields are optional when calling UserModel.create() or UserModel.build()
+  id: CreationOptional<number>;
+  title: string;
+  price: number;
+  imageUrl: string;
+  description: string;
+}
+
+const Product = sequelize.define<IProductModel>("product", {
   id: {
-    type: Sequelize.INTEGER,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
   title: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   price: {
-    type: Sequelize.DOUBLE,
+    type: DataTypes.DOUBLE,
     allowNull: false,
   },
   imageUrl: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true,
   },
   description: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: true,
   },
 });

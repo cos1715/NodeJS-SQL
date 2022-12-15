@@ -63,10 +63,12 @@ export const postEditProduct: RequestHandler<any, any, IProduct> = async (
   try {
     const product = await Product.findByPk(body.id);
     if (product) {
-      (product as any).title = body.title;
-      (product as any).price = body.price;
-      (product as any).imageUrl = body.imageUrl;
-      (product as any).description = body.description;
+      product.set({
+        title: body.title,
+        price: body.price,
+        imageUrl: body.imageUrl,
+        description: body.description,
+      });
       await product.save();
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
     }
