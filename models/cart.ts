@@ -1,62 +1,79 @@
-import fs from "fs";
-import path from "path";
-import rootDir from "../util/path";
-const filePath = path.join(rootDir, "data", "cart.json");
+import {
+  Model,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  BelongsToManyCreateAssociationMixin,
+  Association,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyAddAssociationsMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  BelongsToManyHasAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyRemoveAssociationsMixin,
+  BelongsToManySetAssociationsMixin,
+} from "sequelize";
+import sequelize from "../util/db";
+import { IProductModel } from "./product";
 
-class Cart {
-  static getCart() {
-    const fileBody: any[] = [];
-    let cart = { products: [], totalPrice: 0 };
-    return new Promise((resolve) => {
-      fs.readFile(filePath, (err, fileContent) => {
-        if (!err) {
-          fileBody.push(fileContent);
-          const data = Buffer.concat(fileBody).toString();
-          cart = JSON.parse(data);
-        }
+// Foo.hasOne(Bar)
+// fooInstance.getBar()
+// fooInstance.setBar()
+// fooInstance.createBar()
 
-        resolve(cart);
-      });
-    });
-  }
+// Foo.hasMany(Bar)
+// fooInstance.getBars()
+// fooInstance.countBars()
+// fooInstance.hasBar()
+// fooInstance.hasBars()
+// fooInstance.setBars()
+// fooInstance.addBar()
+// fooInstance.addBars()
+// fooInstance.removeBar()
+// fooInstance.removeBars()
+// fooInstance.createBar()
 
-  static async addProduct(id: any, productPrice: any) {
-    const cart: any = await Cart.getCart();
-    const index = cart.products.findIndex((prod: any) => prod.id === id);
-    const newProduct = cart.products[index] || {};
+class Cart extends Model<InferAttributes<Cart>, InferCreationAttributes<Cart>> {
+  declare id: CreationOptional<number>;
 
-    if (index >= 0) {
-      newProduct.qty++;
-      cart.products[index] = newProduct;
-    } else {
-      newProduct.id = id;
-      newProduct.qty = 1;
-      newProduct.price = Number.parseFloat(productPrice);
-      cart.products = [...cart.products, newProduct];
-    }
-    cart.totalPrice += Number.parseFloat(productPrice);
+  declare getProducts: BelongsToManyGetAssociationsMixin<IProductModel>; // Note the null assertions!
+  declare addProduct: BelongsToManyAddAssociationMixin<IProductModel, number>;
+  declare addProducts: BelongsToManyAddAssociationsMixin<IProductModel, number>;
+  declare setProducts: BelongsToManySetAssociationsMixin<IProductModel, number>;
+  declare removeProduct: BelongsToManyRemoveAssociationMixin<
+    IProductModel,
+    number
+  >;
+  declare removeProducts: BelongsToManyRemoveAssociationsMixin<
+    IProductModel,
+    number
+  >;
+  declare hasProduct: BelongsToManyHasAssociationMixin<IProductModel, number>;
+  declare hasProducts: BelongsToManyHasAssociationsMixin<IProductModel, number>;
+  declare countProducts: BelongsToManyCountAssociationsMixin;
+  declare createProduct: BelongsToManyCreateAssociationMixin<IProductModel>;
 
-    fs.writeFile(filePath, JSON.stringify(cart), (err) => {
-      console.log(err);
-    });
-  }
-
-  static async deleteProduct(id: any) {
-    const cart: any = await Cart.getCart();
-    let price = cart.totalPrice;
-    const products = cart.products.filter((data: any) => {
-      if (data.id === id) {
-        const productPrice = data.price * data.qty;
-        price -= productPrice;
-      }
-      return data.id !== id;
-    });
-    cart.products = products;
-    cart.totalPrice = price;
-    fs.writeFile(filePath, JSON.stringify(cart), (err) => {
-      console.log(err);
-    });
-  }
+  declare static associations: {
+    products: Association<Cart, IProductModel>;
+  };
 }
+
+Cart.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+  },
+  {
+    sequelize,
+    modelName: "cart",
+  }
+);
 
 export default Cart;

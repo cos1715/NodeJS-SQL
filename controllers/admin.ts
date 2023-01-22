@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import Product, { IProduct } from "../models/product";
+import User from "../models/user";
 import { ADMIN_URL_ROUTES, VIEW_ROUTES } from "../const";
 
 export const getAddProduct: RequestHandler = (req, res, next) => {
@@ -11,21 +12,22 @@ export const getAddProduct: RequestHandler = (req, res, next) => {
   });
 };
 
-export const postAddProduct: RequestHandler = (req, res, next) => {
-  Product.create({
-    title: req.body.title,
-    imageUrl: req.body.imageUrl,
-    description: req.body.description,
-    price: req.body.price,
-  })
+export const postAddProduct: RequestHandler = (req: any, res, next) => {
+  (req.user as User)
+    .createProduct({
+      title: req.body.title,
+      imageUrl: req.body.imageUrl,
+      description: req.body.description,
+      price: req.body.price,
+    })
     .then(() => {
       res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
     })
     .catch((err) => console.log("postAddProduct err", err));
 };
 
-export const getProducts: RequestHandler = (req, res, next) => {
-  Product.findAll().then((data) => {
+export const getProducts: RequestHandler = (req: any, res, next) => {
+  (req.user as User).getProducts().then((data) => {
     res.render(VIEW_ROUTES.adminProducts, {
       prods: data,
       pageTitle: "Admin Products",
@@ -34,13 +36,16 @@ export const getProducts: RequestHandler = (req, res, next) => {
   });
 };
 
-export const getEditProduct: RequestHandler = async (req, res, next) => {
+export const getEditProduct: RequestHandler = async (req: any, res, next) => {
   const edit = req.query.edit === "true";
   if (!edit) {
     res.redirect(`/admin${ADMIN_URL_ROUTES.products}`);
   } else {
     const productId = req.params.productId;
-    const product = await Product.findByPk(productId);
+    const [product] = await (req.user as User).getProducts({
+      where: { id: productId },
+    });
+    // const product = await Product.findByPk(productId);
     if (product) {
       res.render(VIEW_ROUTES.adminEditProduct, {
         pageTitle: "Edit Product",

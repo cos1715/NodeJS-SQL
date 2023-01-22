@@ -1,5 +1,5 @@
 import path from "path";
 
-const rooPath = path.dirname(require.main!.filename);
+const rootDir = path.dirname(require.main!.filename);
 
-export default rooPath;
+export default rootDir;

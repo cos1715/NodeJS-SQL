@@ -1,5 +1,4 @@
 import {
-  Sequelize,
   Model,
   DataTypes,
   CreationOptional,
@@ -16,7 +15,7 @@ export interface IProduct {
   description: string;
 }
 
-interface IProductModel
+export interface IProductModel
   extends Model<
     InferAttributes<IProductModel>,
     InferCreationAttributes<IProductModel>
@@ -27,6 +26,7 @@ interface IProductModel
   price: number;
   imageUrl: string;
   description: string;
+  userId?: string;
 }
 
 const Product = sequelize.define<IProductModel>("product", {
